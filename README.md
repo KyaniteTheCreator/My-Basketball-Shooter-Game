@@ -1,2 +1,2 @@
-# My-Personal-Website
-First Stardance Project - Personal Site
+# My-Basketball-Shooter-Game
+First Stardance Project - This is a Simple Basket Ball Shooter Game. 
