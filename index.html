@@ -235,4 +235,259 @@ ball.x=160;
 ball.y=20;
 ball.vx=0;
 ball.vy=0;
-ball.active=
+ball.active=false;
+ball.scored=false;
+drawBall();
+}
+
+function drawBall(){
+ballEl.style.left=ball.x+"px";
+ballEl.style.bottom=ball.y+"px";
+}
+
+function updateStats(){
+
+scoreEl.textContent=score;
+comboEl.textContent=combo;
+
+const acc=
+shots===0 ?
+0 :
+Math.round((makes/shots)*100);
+
+accEl.textContent=acc+"%";
+
+if(score>best){
+best=score;
+localStorage.setItem("basketballBest",best);
+}
+
+bestEl.textContent=best;
+}
+
+function startCharge(){
+if(ball.active||!running) return;
+charging=true;
+}
+
+function releaseShot(){
+
+if(!charging||ball.active||!running) return;
+
+charging=false;
+
+shots++;
+
+ball.active=true;
+
+const force=10+(power/100)*8;
+
+ball.vy=force;
+ball.vx=(Math.random()*2)-1;
+}
+
+function updatePower(){
+
+if(!charging) return;
+
+power += powerDirection*2;
+
+if(power>=100){
+power=100;
+powerDirection=-1;
+}
+
+if(power<=0){
+power=0;
+powerDirection=1;
+}
+
+powerFill.style.width=power+"%";
+}
+
+function updateHoop(){
+
+hoopX+=hoopSpeed;
+
+if(hoopX<0 || hoopX>270){
+hoopSpeed*=-1;
+}
+
+hoop.style.left=hoopX+"px";
+}
+
+function updateBall(){
+
+if(!ball.active) return;
+
+ball.x+=ball.vx;
+ball.y+=ball.vy;
+
+ball.vy-=0.4;
+
+drawBall();
+
+const hoopCenter=hoopX+45;
+const ballCenter=ball.x+19;
+
+if(
+!ball.scored &&
+ball.vy<0 &&
+ball.y>70 &&
+ball.y<130 &&
+Math.abs(ballCenter-hoopCenter)<26
+){
+scoreBasket();
+}
+
+if(ball.y<20){
+ball.active=false;
+if(!ball.scored){
+combo=0;
+updateStats();
+}
+setTimeout(resetBall,150);
+}
+}
+
+function scoreBasket(){
+
+ball.scored=true;
+ball.active=false;
+
+makes++;
+combo++;
+
+score += combo;
+
+if(Math.abs(hoopSpeed)<8){
+hoopSpeed*=1.08;
+}
+
+updateStats();
+
+spawnParticles();
+
+setTimeout(resetBall,150);
+}
+
+function spawnParticles(){
+
+for(let i=0;i<20;i++){
+
+const p=document.createElement("div");
+
+p.className="particle";
+
+p.style.width="8px";
+p.style.height="8px";
+
+p.style.left=(ball.x+15)+"px";
+p.style.bottom=(ball.y+15)+"px";
+
+p.style.background=
+`hsl(${Math.random()*360},100%,60%)`;
+
+court.appendChild(p);
+
+const dx=(Math.random()-0.5)*160;
+const dy=(Math.random()-0.5)*160;
+
+p.animate([
+{
+transform:"translate(0,0)",
+opacity:1
+},
+{
+transform:`translate(${dx}px,${dy}px)`,
+opacity:0
+}
+],{
+duration:700
+});
+
+setTimeout(()=>p.remove(),700);
+}
+}
+
+function gameLoop(){
+
+if(running){
+
+updatePower();
+updateHoop();
+updateBall();
+
+}
+
+requestAnimationFrame(gameLoop);
+}
+
+document.getElementById("shootBtn")
+.addEventListener("mousedown",startCharge);
+
+document.getElementById("shootBtn")
+.addEventListener("mouseup",releaseShot);
+
+document.getElementById("shootBtn")
+.addEventListener("touchstart",(e)=>{
+e.preventDefault();
+startCharge();
+});
+
+document.getElementById("shootBtn")
+.addEventListener("touchend",(e)=>{
+e.preventDefault();
+releaseShot();
+});
+
+document.addEventListener("keydown",(e)=>{
+
+if(e.code==="Space"){
+
+e.preventDefault();
+
+if(!charging){
+startCharge();
+}else{
+releaseShot();
+}
+}
+});
+
+setInterval(()=>{
+
+if(!running) return;
+
+gameTime--;
+
+timeEl.textContent=gameTime;
+
+if(gameTime<=0){
+
+running=false;
+
+gameOverEl.style.display="flex";
+
+finalScoreEl.textContent=
+"Score: "+score;
+}
+
+},1000);
+
+document
+.getElementById("restartBtn")
+.addEventListener("click",()=>{
+
+location.reload();
+
+});
+
+resetBall();
+updateStats();
+gameLoop();
+
+</script>
+
+</body>
+</html>
