@@ -1,90 +1,143 @@
-<!-- Main Game Box -->
-<div id="court" style="width: 320px; height: 420px; border: 5px solid #222; background: #f0e68c; position: relative; margin: 10px auto; font-family: 'Comic Sans MS', cursive, sans-serif; text-align: center;">
-  
-  <div style="background: #222; color: #fff; padding: 5px 0; font-weight: bold; font-size: 18px;">
-    BASKETBALL GAME v1.0
-  </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basketball Arcade Pro</title>
 
-  <div style="font-size: 20px; margin-top: 8px;">
-    SCORE: <span id="score" style="color: red; font-weight: bold;">0</span>
-  </div>
+<style>
 
-  <!-- Hoop: Backboard + Red Ring -->
-  <div id="hoop-board" style="width: 70px; height: 45px; background: white; border: 3px solid black; position: absolute; top: 50px; left: 0px;">
-    <div style="width: 40px; height: 8px; background: red; margin: 30px auto 0 auto; border-radius: 4px;"></div>
-  </div>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,sans-serif;
+}
 
-  <!-- Ball -->
-  <div id="ball" style="font-size: 32px; position: absolute; bottom: 20px; left: 140px; user-select: none;">
-    🏀
-  </div>
+body{
+    background:#141414;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+    color:white;
+}
 
-</div>
+h1{
+    margin-bottom:15px;
+}
 
-<!-- Big Red Button -->
-<div style="text-align: center;">
-  <button id="shoot-btn" onclick="shoot()" style="padding: 12px 25px; font-size: 18px; font-weight: bold; background: #ff4500; color: white; border: 3px solid black; border-radius: 8px; cursor: pointer; box-shadow: 2px 2px 0px #000;">
-    SHOOT!
-  </button>
-</div>
+.stats{
+    display:flex;
+    gap:20px;
+    margin-bottom:15px;
+    flex-wrap:wrap;
+    justify-content:center;
+}
 
-<script>
-  // Game variables
-  var hoop = document.getElementById("hoop-board");
-  var ball = document.getElementById("ball");
-  var scoreText = document.getElementById("score");
-  
-  var hoopX = 0;
-  var speed = 4;
-  var ballY = 20;
-  var isMovingUp = false;
-  var score = 0;
+.stat{
+    background:#222;
+    padding:10px 16px;
+    border-radius:10px;
+}
 
-  // 1. Hoop Movement Loop
-  setInterval(function() {
-    hoopX += speed;
-    
-    // Bounce off side walls (320px container width - 76px hoop width)
-    if (hoopX > 244 || hoopX < 0) {
-      speed = -speed;
-    }
-    
-    hoop.style.left = hoopX + "px";
-  }, 20);
+#court{
+    width:350px;
+    height:500px;
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(#f5e7a0,#d9be69);
+    border:5px solid #000;
+    border-radius:12px;
+}
 
-  // 2. Shoot Function
-  function shoot() {
-    if (isMovingUp) return; // Prevent double clicks
-    
-    isMovingUp = true;
-    
-    var timer = setInterval(function() {
-      ballY += 12;
-      ball.style.bottom = ballY + "px";
+#hoop{
+    width:90px;
+    height:55px;
+    position:absolute;
+    top:80px;
+    left:0;
+}
 
-      // Reached hoop height
-      if (ballY >= 320) {
-        clearInterval(timer);
-        checkScore();
-      }
-    }, 15);
-  }
+.backboard{
+    width:100%;
+    height:45px;
+    background:white;
+    border:3px solid black;
+}
 
-  // 3. Score Checker
-  function checkScore() {
-    // The ball is centered at roughly 140px left. 
-    // Check if the hoop covers that spot when the ball reaches the top.
-    if (hoopX <= 140 && (hoopX + 70) >= 140) {
-      score = score + 1;
-      scoreText.innerText = score;
-      
-      // Speed up slightly each point to make it harder
-      if (speed > 0) { speed += 1; } else { speed -= 1; }
-    }
+.rim{
+    position:absolute;
+    width:52px;
+    height:8px;
+    background:red;
+    bottom:8px;
+    left:50%;
+    transform:translateX(-50%);
+    border-radius:10px;
+}
 
-    // Reset ball back to bottom
-    ballY = 20;
-    ball.style.bottom = ballY + "px";
-    isMovingUp = false;
-  }
-</script>
+#ball{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:orange;
+    border:3px solid #2d2d2d;
+    position:absolute;
+    left:156px;
+    bottom:20px;
+}
+
+.line1,
+.line2{
+    position:absolute;
+    background:#222;
+}
+
+.line1{
+    width:3px;
+    height:100%;
+    left:50%;
+}
+
+.line2{
+    width:100%;
+    height:3px;
+    top:50%;
+}
+
+#controls{
+    margin-top:20px;
+}
+
+button{
+    padding:12px 28px;
+    border:none;
+    border-radius:8px;
+    background:#ff5500;
+    color:white;
+    font-size:20px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+button:hover{
+    transform:scale(1.05);
+}
+
+.particle{
+    position:absolute;
+    pointer-events:none;
+    border-radius:50%;
+}
+
+</style>
+</head>
+<body>
+
+<h1>🏀 Basketball Arcade Pro</h1>
+
+<div class="stats">
+    <div class="stat">Score: <span id="score">0</span></div>
+    <div class="stat">Combo: 
