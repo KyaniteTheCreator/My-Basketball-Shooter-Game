@@ -2,24 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Basketball Arcade Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basketball Challenge</title>
 
 <style>
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial,sans-serif;
+font-family:Segoe UI,sans-serif;
 }
 
 body{
-background:#121212;
+background:linear-gradient(135deg,#0f172a,#1e293b);
 color:white;
 display:flex;
 flex-direction:column;
 align-items:center;
 padding:20px;
+min-height:100vh;
 }
 
 h1{
@@ -28,202 +29,163 @@ margin-bottom:15px;
 
 .stats{
 display:flex;
-flex-wrap:wrap;
-gap:10px;
-justify-content:center;
+gap:15px;
 margin-bottom:15px;
+flex-wrap:wrap;
+justify-content:center;
 }
 
-.stat{
-background:#222;
+.card{
+background:rgba(255,255,255,0.12);
 padding:10px 15px;
 border-radius:10px;
-font-weight:bold;
+backdrop-filter:blur(5px);
 }
 
-#court{
-width:360px;
-height:520px;
-background:linear-gradient(#ffe9a8,#d6b86e);
-border:5px solid black;
-border-radius:12px;
+#game{
+width:400px;
+height:600px;
+max-width:95vw;
+background:linear-gradient(#87ceeb,#f6d365);
+border-radius:20px;
 position:relative;
 overflow:hidden;
+border:4px solid white;
 }
 
 #hoop{
 position:absolute;
+top:90px;
 width:90px;
-height:70px;
-top:60px;
-left:0;
+height:60px;
 }
 
-#backboard{
-width:100%;
-height:45px;
+.backboard{
+width:90px;
+height:40px;
 background:white;
-border:3px solid black;
+border:3px solid #222;
 }
 
-#rim{
-position:absolute;
+.rim{
 width:55px;
 height:8px;
 background:red;
-left:50%;
-transform:translateX(-50%);
-top:42px;
-border-radius:5px;
+position:absolute;
+left:17px;
+top:38px;
+border-radius:10px;
 }
 
 #ball{
-width:38px;
-height:38px;
-background:orange;
-border-radius:50%;
-border:2px solid black;
 position:absolute;
-bottom:20px;
-left:160px;
+width:40px;
+height:40px;
+background:#ff7b00;
+border-radius:50%;
+left:180px;
+bottom:25px;
+border:2px solid #000;
+box-shadow:0 0 15px rgba(0,0,0,.2);
 }
 
-#powerContainer{
-width:360px;
+#powerWrap{
+width:400px;
+max-width:95vw;
 height:18px;
-border:2px solid white;
-margin-top:15px;
+margin-top:20px;
 border-radius:20px;
+border:2px solid white;
 overflow:hidden;
 }
 
-#powerFill{
+#power{
 height:100%;
 width:0%;
-background:lime;
-}
-
-.controls{
-margin-top:15px;
-display:flex;
-gap:10px;
+background:linear-gradient(90deg,lime,gold,red);
 }
 
 button{
-padding:12px 20px;
-border:none;
-border-radius:8px;
+margin-top:15px;
+padding:14px 26px;
 font-size:18px;
 font-weight:bold;
+border:none;
+border-radius:12px;
+background:#ff5722;
+color:white;
 cursor:pointer;
 }
 
-#shootBtn{
-background:#ff5a00;
-color:white;
-}
-
-#restartBtn{
-background:#3498db;
-color:white;
+button:hover{
+transform:scale(1.05);
 }
 
 .particle{
 position:absolute;
-pointer-events:none;
+width:8px;
+height:8px;
 border-radius:50%;
-}
-
-#gameOver{
-display:none;
-position:absolute;
-inset:0;
-background:rgba(0,0,0,.8);
-color:white;
-justify-content:center;
-align-items:center;
-flex-direction:column;
-font-size:28px;
-font-weight:bold;
-z-index:10;
+pointer-events:none;
 }
 </style>
 </head>
 <body>
 
-<h1>🏀 Basketball Arcade Pro</h1>
+<h1>🏀 Basketball Challenge</h1>
 
 <div class="stats">
-<div class="stat">Score: <span id="score">0</span></div>
-<div class="stat">Combo: <span id="combo">0</span></div>
-<div class="stat">Accuracy: <span id="accuracy">0%</span></div>
-<div class="stat">Time: <span id="time">60</span></div>
-<div class="stat">Best: <span id="best">0</span></div>
+<div class="card">Score: <span id="score">0</span></div>
+<div class="card">Best: <span id="best">0</span></div>
+<div class="card">Shots: <span id="shots">0</span></div>
 </div>
 
-<div id="court">
-
-<div id="gameOver">
-<div>GAME OVER</div>
-<div id="finalScore"></div>
-</div>
+<div id="game">
 
 <div id="hoop">
-<div id="backboard"></div>
-<div id="rim"></div>
+<div class="backboard"></div>
+<div class="rim"></div>
 </div>
 
 <div id="ball"></div>
 
 </div>
 
-<div id="powerContainer">
-<div id="powerFill"></div>
+<div id="powerWrap">
+<div id="power"></div>
 </div>
 
-<div class="controls">
-<button id="shootBtn">SHOOT</button>
-<button id="restartBtn">RESTART</button>
-</div>
+<button id="shootBtn">HOLD TO SHOOT</button>
 
 <script>
 
-const court = document.getElementById("court");
+const game = document.getElementById("game");
 const hoop = document.getElementById("hoop");
 const ballEl = document.getElementById("ball");
-const powerFill = document.getElementById("powerFill");
+const powerBar = document.getElementById("power");
 
 const scoreEl = document.getElementById("score");
-const comboEl = document.getElementById("combo");
-const accEl = document.getElementById("accuracy");
-const timeEl = document.getElementById("time");
-
-const gameOverEl = document.getElementById("gameOver");
-const finalScoreEl = document.getElementById("finalScore");
-
 const bestEl = document.getElementById("best");
+const shotsEl = document.getElementById("shots");
 
-let best = Number(localStorage.getItem("basketballBest") || 0);
+let best =
+Number(localStorage.getItem("basketball-best") || 0);
+
 bestEl.textContent = best;
 
-let score=0;
-let combo=0;
-let shots=0;
-let makes=0;
+let score = 0;
+let shots = 0;
 
-let gameTime=60;
-let running=true;
+let hoopX = 0;
+let hoopSpeed = 3;
 
-let hoopX=0;
-let hoopSpeed=3;
+let charging = false;
+let power = 0;
+let powerDirection = 1;
 
-let charging=false;
-let power=0;
-let powerDirection=1;
-
-const ball={
-x:160,
-y:20,
+const ball = {
+x:180,
+y:25,
 vx:0,
 vy:0,
 active:false,
@@ -231,167 +193,125 @@ scored:false
 };
 
 function resetBall(){
-ball.x=160;
-ball.y=20;
-ball.vx=0;
-ball.vy=0;
-ball.active=false;
-ball.scored=false;
+ball.x = 180;
+ball.y = 25;
+ball.vx = 0;
+ball.vy = 0;
+ball.active = false;
+ball.scored = false;
 drawBall();
 }
 
 function drawBall(){
-ballEl.style.left=ball.x+"px";
-ballEl.style.bottom=ball.y+"px";
+ballEl.style.left = ball.x + "px";
+ballEl.style.bottom = ball.y + "px";
 }
 
-function updateStats(){
+function updateUI(){
 
-scoreEl.textContent=score;
-comboEl.textContent=combo;
+scoreEl.textContent = score;
+shotsEl.textContent = shots;
 
-const acc=
-shots===0 ?
-0 :
-Math.round((makes/shots)*100);
-
-accEl.textContent=acc+"%";
-
-if(score>best){
-best=score;
-localStorage.setItem("basketballBest",best);
+if(score > best){
+best = score;
+localStorage.setItem(
+"basketball-best",
+best
+);
 }
 
-bestEl.textContent=best;
+bestEl.textContent = best;
 }
 
-function startCharge(){
-if(ball.active||!running) return;
-charging=true;
+function startCharging(){
+
+if(ball.active) return;
+charging = true;
+
 }
 
 function releaseShot(){
 
-if(!charging||ball.active||!running) return;
+if(!charging || ball.active)
+return;
 
-charging=false;
+charging = false;
 
 shots++;
 
-ball.active=true;
+ball.active = true;
 
-const force=10+(power/100)*8;
-
-ball.vy=force;
-ball.vx=(Math.random()*2)-1;
+ball.vy = 10 + power * 0.12;
+ball.vx =
+((hoopX + 45) - (ball.x + 20)) / 100;
 }
 
 function updatePower(){
 
 if(!charging) return;
 
-power += powerDirection*2;
+power += powerDirection * 2;
 
-if(power>=100){
-power=100;
-powerDirection=-1;
+if(power > 100){
+power = 100;
+powerDirection = -1;
 }
 
-if(power<=0){
-power=0;
-powerDirection=1;
+if(power < 0){
+power = 0;
+powerDirection = 1;
 }
 
-powerFill.style.width=power+"%";
+powerBar.style.width =
+power + "%";
 }
 
 function updateHoop(){
 
-hoopX+=hoopSpeed;
+hoopX += hoopSpeed;
 
-if(hoopX<0 || hoopX>270){
-hoopSpeed*=-1;
+if(hoopX < 0 || hoopX > 310){
+hoopSpeed *= -1;
 }
 
-hoop.style.left=hoopX+"px";
-}
-
-function updateBall(){
-
-if(!ball.active) return;
-
-ball.x+=ball.vx;
-ball.y+=ball.vy;
-
-ball.vy-=0.4;
-
-drawBall();
-
-const hoopCenter=hoopX+45;
-const ballCenter=ball.x+19;
-
-if(
-!ball.scored &&
-ball.vy<0 &&
-ball.y>70 &&
-ball.y<130 &&
-Math.abs(ballCenter-hoopCenter)<26
-){
-scoreBasket();
-}
-
-if(ball.y<20){
-ball.active=false;
-if(!ball.scored){
-combo=0;
-updateStats();
-}
-setTimeout(resetBall,150);
-}
+hoop.style.left = hoopX + "px";
 }
 
 function scoreBasket(){
 
-ball.scored=true;
-ball.active=false;
+ball.scored = true;
+ball.active = false;
 
-makes++;
-combo++;
+score++;
 
-score += combo;
+hoopSpeed *= 1.05;
 
-if(Math.abs(hoopSpeed)<8){
-hoopSpeed*=1.08;
-}
+updateUI();
 
-updateStats();
+for(let i = 0; i < 20; i++){
 
-spawnParticles();
+const p =
+document.createElement("div");
 
-setTimeout(resetBall,150);
-}
+p.className = "particle";
 
-function spawnParticles(){
+p.style.left =
+(ball.x + 15) + "px";
 
-for(let i=0;i<20;i++){
+p.style.bottom =
+(ball.y + 15) + "px";
 
-const p=document.createElement("div");
+p.style.background =
+`hsl(${Math.random()*360},
+100%,60%)`;
 
-p.className="particle";
+game.appendChild(p);
 
-p.style.width="8px";
-p.style.height="8px";
+const x =
+(Math.random()-0.5)*150;
 
-p.style.left=(ball.x+15)+"px";
-p.style.bottom=(ball.y+15)+"px";
-
-p.style.background=
-`hsl(${Math.random()*360},100%,60%)`;
-
-court.appendChild(p);
-
-const dx=(Math.random()-0.5)*160;
-const dy=(Math.random()-0.5)*160;
+const y =
+(Math.random()-0.5)*150;
 
 p.animate([
 {
@@ -399,93 +319,122 @@ transform:"translate(0,0)",
 opacity:1
 },
 {
-transform:`translate(${dx}px,${dy}px)`,
+transform:
+`translate(${x}px,${y}px)`,
 opacity:0
 }
 ],{
-duration:700
+duration:800
 });
 
-setTimeout(()=>p.remove(),700);
+setTimeout(()=>{
+p.remove();
+},800);
+}
+
+setTimeout(resetBall,200);
+}
+
+function updateBall(){
+
+if(!ball.active) return;
+
+ball.x += ball.vx;
+ball.y += ball.vy;
+
+ball.vy -= 0.35;
+
+drawBall();
+
+const hoopCenter =
+hoopX + 45;
+
+const ballCenter =
+ball.x + 20;
+
+if(
+!ball.scored &&
+ball.vy < 0 &&
+ball.y > 85 &&
+ball.y < 120 &&
+Math.abs(
+ballCenter - hoopCenter
+) < 22
+){
+scoreBasket();
+}
+
+if(ball.y <= 25){
+
+ball.active = false;
+
+setTimeout(
+resetBall,
+200
+);
 }
 }
 
-function gameLoop(){
-
-if(running){
+function loop(){
 
 updatePower();
 updateHoop();
 updateBall();
 
+requestAnimationFrame(loop);
 }
 
-requestAnimationFrame(gameLoop);
-}
+document
+.getElementById("shootBtn")
+.addEventListener(
+"mousedown",
+startCharging
+);
 
-document.getElementById("shootBtn")
-.addEventListener("mousedown",startCharge);
+document
+.getElementById("shootBtn")
+.addEventListener(
+"mouseup",
+releaseShot
+);
 
-document.getElementById("shootBtn")
-.addEventListener("mouseup",releaseShot);
-
-document.getElementById("shootBtn")
-.addEventListener("touchstart",(e)=>{
+document
+.getElementById("shootBtn")
+.addEventListener(
+"touchstart",
+e=>{
 e.preventDefault();
-startCharge();
-});
+startCharging();
+}
+);
 
-document.getElementById("shootBtn")
-.addEventListener("touchend",(e)=>{
+document
+.getElementById("shootBtn")
+.addEventListener(
+"touchend",
+e=>{
 e.preventDefault();
 releaseShot();
-});
+}
+);
 
-document.addEventListener("keydown",(e)=>{
+document.addEventListener(
+"keydown",
+e=>{
 
 if(e.code==="Space"){
 
-e.preventDefault();
-
-if(!charging){
-startCharge();
-}else{
+if(!charging)
+startCharging();
+else
 releaseShot();
+
 }
-}
-});
-
-setInterval(()=>{
-
-if(!running) return;
-
-gameTime--;
-
-timeEl.textContent=gameTime;
-
-if(gameTime<=0){
-
-running=false;
-
-gameOverEl.style.display="flex";
-
-finalScoreEl.textContent=
-"Score: "+score;
-}
-
-},1000);
-
-document
-.getElementById("restartBtn")
-.addEventListener("click",()=>{
-
-location.reload();
-
 });
 
 resetBall();
-updateStats();
-gameLoop();
+updateUI();
+loop();
 
 </script>
 
