@@ -1,47 +1,90 @@
-<html>
-<head>
-   <link rel="stylesheet" href="./styles.css">
-   <style> 
-   body {
-    margin: 0;
-    padding: 40px;
-    background: linear-gradient(135deg, #4a90e2, #8e44ad, #2ecc71);
-    font-family: "Segoe UI", sans-serif;
-}
+<!-- Main Game Box -->
+<div id="court" style="width: 320px; height: 420px; border: 5px solid #222; background: #f0e68c; position: relative; margin: 10px auto; font-family: 'Comic Sans MS', cursive, sans-serif; text-align: center;">
+  
+  <div style="background: #222; color: #fff; padding: 5px 0; font-weight: bold; font-size: 18px;">
+    BASKETBALL GAME v1.0
+  </div>
 
-.page {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 30px;
-    background: rgba(255, 255, 255, 0.92);
-    border-radius: 30px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
-}
+  <div style="font-size: 20px; margin-top: 8px;">
+    SCORE: <span id="score" style="color: red; font-weight: bold;">0</span>
+  </div>
 
-h1 {
-    color: #2b2d81;
-    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.12);
-}
+  <!-- Hoop: Backboard + Red Ring -->
+  <div id="hoop-board" style="width: 70px; height: 45px; background: white; border: 3px solid black; position: absolute; top: 50px; left: 0px;">
+    <div style="width: 40px; height: 8px; background: red; margin: 30px auto 0 auto; border-radius: 4px;"></div>
+  </div>
 
-p {
-    color: #2a3d5a;
-    font-size: 1.2rem;
-    line-height: 1.6;
-    margin-bottom: 24px;
-}
+  <!-- Ball -->
+  <div id="ball" style="font-size: 32px; position: absolute; bottom: 20px; left: 140px; user-select: none;">
+    🏀
+  </div>
 
-img {
-    width: 100%;
-    border-radius: 20px;
-    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
-}
-   </style>
-</head>
-<body>
-    <div class="page">
-        <h1>My Personal Website</h1>
-        <p>This website is a project I&#39;m doing on Stardance as part of Hack Club.</p>
-        <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80" alt="Colorful coding workspace">
-    </div>
-</body>
-</html>
+</div>
+
+<!-- Big Red Button -->
+<div style="text-align: center;">
+  <button id="shoot-btn" onclick="shoot()" style="padding: 12px 25px; font-size: 18px; font-weight: bold; background: #ff4500; color: white; border: 3px solid black; border-radius: 8px; cursor: pointer; box-shadow: 2px 2px 0px #000;">
+    SHOOT!
+  </button>
+</div>
+
+<script>
+  // Game variables
+  var hoop = document.getElementById("hoop-board");
+  var ball = document.getElementById("ball");
+  var scoreText = document.getElementById("score");
+  
+  var hoopX = 0;
+  var speed = 4;
+  var ballY = 20;
+  var isMovingUp = false;
+  var score = 0;
+
+  // 1. Hoop Movement Loop
+  setInterval(function() {
+    hoopX += speed;
+    
+    // Bounce off side walls (320px container width - 76px hoop width)
+    if (hoopX > 244 || hoopX < 0) {
+      speed = -speed;
+    }
+    
+    hoop.style.left = hoopX + "px";
+  }, 20);
+
+  // 2. Shoot Function
+  function shoot() {
+    if (isMovingUp) return; // Prevent double clicks
+    
+    isMovingUp = true;
+    
+    var timer = setInterval(function() {
+      ballY += 12;
+      ball.style.bottom = ballY + "px";
+
+      // Reached hoop height
+      if (ballY >= 320) {
+        clearInterval(timer);
+        checkScore();
+      }
+    }, 15);
+  }
+
+  // 3. Score Checker
+  function checkScore() {
+    // The ball is centered at roughly 140px left. 
+    // Check if the hoop covers that spot when the ball reaches the top.
+    if (hoopX <= 140 && (hoopX + 70) >= 140) {
+      score = score + 1;
+      scoreText.innerText = score;
+      
+      // Speed up slightly each point to make it harder
+      if (speed > 0) { speed += 1; } else { speed -= 1; }
+    }
+
+    // Reset ball back to bottom
+    ballY = 20;
+    ball.style.bottom = ballY + "px";
+    isMovingUp = false;
+  }
+</script>
