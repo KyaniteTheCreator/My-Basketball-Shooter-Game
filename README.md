@@ -3,6 +3,7 @@ A simple 2D web game where you charge up your shots to score hoops.
 
 Play the Game: 
 🏀 Play it right here!
+https://kyanitethecreator.github.io/My-Basketball-Shooter-Game/
 
 Quick Start:
 You literally just click the link above. It runs right in your browser so you don't need to download anything. Just hold the charge button to build power, and let go to shoot.
